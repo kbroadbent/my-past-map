@@ -6,14 +6,14 @@ My Past Map is a web application that lets users upload a GEDCOM genealogy file 
 
 **Target audience:** Hobby genealogists who already maintain a family tree in FamilySearch, Ancestry, MyHeritage, Gramps, or similar platforms.
 
-**Key value proposition:** A new way to experience genealogy data — not as a tree diagram, but as a living map that shows where your ancestors were born, married, lived, and died across time and place.
+**Key value proposition:** A new way to experience genealogy data — not as a tree diagram, but as a living map that shows where your ancestors were born, married, lived, and died across time and place. Users can explore in either direction: start from themselves and trace backward through history, or start from their earliest known ancestors and watch their family story unfold forward to the present.
 
 ## Goals
 
 - Let users see their ancestry geographically, across time
 - Support all major genealogy platforms via GEDCOM file upload
 - Keep user data private — everything runs in the browser, no backend
-- Provide smooth, animated time-travel through generations
+- Provide smooth, animated time-travel through generations in both directions — from the user backward to ancestors, or from the oldest ancestors forward to the present
 - Handle large trees (up to 10-12 generations) without performance degradation
 
 ## Non-Goals
@@ -171,7 +171,7 @@ Full-screen Mapbox GL map. This is where users spend most of their time.
   - Birth: gold, star icon
   - Death: slate/gray, cross icon
   - Marriage: warm rose/pink, ring icon
-  - Immigration/Emigration: teal, arrow icon
+  - Immigration/Emigration: teal (`#4a9a8a`), arrow icon
   - Military: olive, shield icon
   - Other events: amber, circle icon
 - Marker size decreases for older generations
@@ -198,12 +198,16 @@ Full-screen Mapbox GL map. This is where users spend most of their time.
 #### Timeline Scrubber (bottom bar)
 
 - **Play/pause button** — Uses `requestAnimationFrame` for smooth animation (not `setInterval`). `aria-label` toggles between "Play timeline" / "Pause timeline".
-- **Draggable scrubber** — Native `<input type="range">` or `role="slider"` with full ARIA attributes (`aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` showing the year). Arrow keys for keyboard control.
+- **Playback direction toggle** — "Forward" / "Backward" button next to play/pause. Controls the direction of animated playback:
+  - **Forward (toward present):** Starts from the oldest visible generation and animates toward the user, showing ancestors appearing chronologically as time moves forward. Use case: "Start from my earliest ancestors and play forward to me."
+  - **Backward (toward past):** Starts from the user and animates backward in time, showing ancestors appearing as generations recede into the past. Use case: "Start from me and go back through my ancestors."
+  - The scrubber thumb moves in the corresponding direction during playback. Manual dragging works in either direction regardless of the toggle.
+- **Draggable scrubber** — Native `<input type="range">` or `role="slider"` with full ARIA attributes (`aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` showing the year). Arrow keys for keyboard control. Dragging left moves backward in time, right moves forward — always works bidirectionally regardless of playback direction setting.
 - **Year display** — Large, prominent current year indicator
 - **Generation tick marks** — Visual markers on the scrubber showing generation boundaries. Use `aria-label` (not `title` attribute).
-- **Generation step buttons** — "Previous Generation" / "Next Generation" with `aria-label`. Jumps the scrubber to the pre-computed generation boundary year and fits the map to those ancestors' locations.
-- **"Jump to Generation" dropdown** — Select a specific generation number, animates the timeline and map.
-- **Animation performance**: Pre-sorted event array + binary search. Compute only the delta (events entering/leaving the visible range) per frame. Throttle source updates if needed. Periodically announce current year via `aria-live` during playback (every ~10 years or at generation boundaries).
+- **Generation step buttons** — "Previous Generation" (further back in time) / "Next Generation" (closer to present) with `aria-label`. Jumps the scrubber to the pre-computed generation boundary year and fits the map to those ancestors' locations. Works in either direction.
+- **"Jump to Generation" dropdown** — Select a specific generation number, animates the timeline and map to that generation's time range.
+- **Animation performance**: Pre-sorted event array + binary search. Compute only the delta (events entering/leaving the visible range) per frame. Throttle source updates if needed. Periodically announce current year via `aria-live` during playback (every ~10 years or at generation boundaries). Delta computation works identically for both directions — the only difference is whether the current year increments or decrements per frame.
 
 #### Reset View Button
 
