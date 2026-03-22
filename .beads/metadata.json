@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "my_past_map",
+  "project_id": "c3f4c97e-4a72-4540-825c-9e770fec7e05"
+}
