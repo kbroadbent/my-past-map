@@ -1,5 +1,8 @@
 .fabricator/
 .fabricator-worktrees/
+node_modules/
+.svelte-kit/
+build/
 
 # Dolt database files (added by bd init)
 .dolt/

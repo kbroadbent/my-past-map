@@ -1,0 +1,35 @@
+:root {
+	/* Landing page colors */
+	--color-parchment-light: #faf4e8;
+	--color-parchment-dark: #efe3c8;
+	--color-gold: #b8860b;
+	--color-brown-dark: #2a2118;
+
+	/* Map view colors */
+	--color-map-bg: #1e1a14;
+	--color-map-panel: rgba(30, 26, 20, 0.95);
+	--color-map-text-primary: #d4c4a0;
+
+	/* Marker colors */
+	--color-birth: #e8a84c;
+	--color-death: #5a8f6a;
+	--color-marriage: #c75643;
+	--color-immigration: #4a9a8a;
+	--color-military: #6b7c3f;
+	--color-other: #9a7b5a;
+
+	/* Typography */
+	--font-heading: Georgia, 'Times New Roman', serif;
+	--font-body: system-ui, -apple-system, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: var(--font-body);
+}
