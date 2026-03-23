@@ -16,3 +16,23 @@ db.version(1).stores({
 });
 
 export { db };
+
+export async function hasData(): Promise<boolean> {
+	const peopleCount = await db.people.count();
+	if (peopleCount > 0) return true;
+	const eventsCount = await db.events.count();
+	return eventsCount > 0;
+}
+
+export async function clearAll(): Promise<void> {
+	await db.people.clear();
+	await db.events.clear();
+	await db.families.clear();
+}
+
+export async function getCachedTreeSummary(): Promise<{ personCount: number; eventCount: number } | null> {
+	const personCount = await db.people.count();
+	if (personCount === 0) return null;
+	const eventCount = await db.events.count();
+	return { personCount, eventCount };
+}
