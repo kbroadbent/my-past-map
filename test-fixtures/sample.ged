@@ -1,0 +1,62 @@
+0 HEAD
+1 SOUR Test
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME John /Smith/
+1 SEX M
+1 BIRT
+2 DATE 15 MAR 1950
+2 PLAC Salt Lake City, Utah, USA
+1 DEAT
+2 DATE 10 JAN 2020
+2 PLAC Provo, Utah, USA
+1 FAMS @F1@
+0 @I2@ INDI
+1 NAME Mary /Jones/
+1 SEX F
+1 BIRT
+2 DATE 22 JUN 1952
+2 PLAC Liverpool, Lancashire, England
+1 FAMS @F1@
+0 @I3@ INDI
+1 NAME Robert /Smith/
+1 SEX M
+1 BIRT
+2 DATE 5 APR 1920
+2 PLAC Boston, Massachusetts, USA
+1 DEAT
+2 DATE 3 NOV 1998
+2 PLAC Boston, Massachusetts, USA
+1 FAMS @F2@
+1 FAMC @F2@
+0 @I4@ INDI
+1 NAME Margaret /Williams/
+1 SEX F
+1 BIRT
+2 DATE 12 MAR 1921
+2 PLAC Liverpool, Lancashire, England
+1 DEAT
+2 DATE 3 NOV 1998
+2 PLAC Boston, Massachusetts, USA
+1 IMMI
+2 DATE 1946
+2 PLAC New York, USA
+1 FAMS @F2@
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I5@
+0 @F2@ FAM
+1 HUSB @I3@
+1 WIFE @I4@
+1 CHIL @I1@
+0 @I5@ INDI
+1 NAME Sarah /Smith/
+1 SEX F
+1 BIRT
+2 DATE 1 DEC 1980
+2 PLAC Provo, Utah, USA
+0 TRLR
