@@ -6,6 +6,9 @@ export default defineConfig({
 	test: {
 		include: ['tests/unit/**/*.test.ts'],
 		environment: 'jsdom',
-		setupFiles: ['./tests/setup.ts']
+		setupFiles: ['./tests/setup.ts', '@testing-library/svelte/vitest']
+	},
+	resolve: {
+		conditions: ['browser']
 	}
 });

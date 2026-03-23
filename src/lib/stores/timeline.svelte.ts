@@ -3,6 +3,51 @@ interface TimelineEntry {
 	eventIndex: number;
 }
 
+export function getTimeline() {
+	let _minYear = $state(0);
+	let _maxYear = $state(0);
+	let _currentYear = $state(0);
+	let _isPlaying = $state(false);
+	let _direction = $state<'forward' | 'backward'>('backward');
+
+	function setRange(min: number, max: number) {
+		_minYear = min;
+		_maxYear = max;
+		_currentYear = max;
+	}
+
+	function setYear(year: number) {
+		_currentYear = Math.max(_minYear, Math.min(_maxYear, year));
+	}
+
+	function togglePlay() {
+		_isPlaying = !_isPlaying;
+	}
+
+	function toggleDirection() {
+		_direction = _direction === 'backward' ? 'forward' : 'backward';
+	}
+
+	function reset() {
+		_currentYear = _maxYear;
+		_isPlaying = false;
+		_direction = 'backward';
+	}
+
+	return {
+		get minYear() { return _minYear; },
+		get maxYear() { return _maxYear; },
+		get currentYear() { return _currentYear; },
+		get isPlaying() { return _isPlaying; },
+		get direction() { return _direction; },
+		setRange,
+		setYear,
+		togglePlay,
+		toggleDirection,
+		reset
+	};
+}
+
 /**
  * Binary search to find the count of visible events up to (and including) the given year.
  */
