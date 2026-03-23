@@ -6,7 +6,9 @@ interface TreeData {
 	families: Family[];
 }
 
-export function getTree() {
+let instance: ReturnType<typeof createTree> | null = null;
+
+function createTree() {
 	let data: TreeData | null = $state(null);
 
 	function load(input: TreeData) {
@@ -52,4 +54,11 @@ export function getTree() {
 		getFamily,
 		getEventsByGeneration
 	};
+}
+
+export function getTree() {
+	if (!instance) {
+		instance = createTree();
+	}
+	return instance;
 }
