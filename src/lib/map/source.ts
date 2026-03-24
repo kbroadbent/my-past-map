@@ -71,3 +71,10 @@ export function buildGeoJSON(events: EventInput[], people: PersonInput[]): GeoJS
 
 	return { type: 'FeatureCollection', features };
 }
+
+export function buildFilterExpression(activeTypes: string[]): any[] {
+	if (activeTypes.length === 0) {
+		return ['==', ['get', 'type'], ''];
+	}
+	return ['in', ['get', 'type'], ['literal', activeTypes]];
+}
