@@ -6,12 +6,18 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
  *
  * The component receives eventCounts (Record<string, number>) and
  * onFilterChange callback, renders checkbox toggles for each event
- * type that has data, and wires to the filters store.
+ * type that has data, and wires to the filters store and Mapbox
+ * filter expressions.
  */
 
 async function getComponent() {
 	const mod = await import('../../src/lib/components/EventFilters.svelte');
 	return mod.default;
+}
+
+async function getBuildFilterExpression() {
+	const mod = await import('../../src/lib/map/source.js');
+	return mod.buildFilterExpression;
 }
 
 const sampleCounts: Record<string, number> = {
@@ -167,5 +173,150 @@ describe('EventFilters component', () => {
 
 		expect(screen.getByRole('checkbox', { name: /birth/i })).toBeDefined();
 		expect(screen.getByRole('checkbox', { name: /death/i })).toBeDefined();
+	});
+
+	it('calls onFilterChange with all types when no checkboxes are toggled', async () => {
+		const EventFilters = await getComponent();
+		const onFilterChange = vi.fn();
+		render(EventFilters, { props: { eventCounts: { birth: 10, death: 5, marriage: 3 }, onFilterChange } });
+
+		// Toggle birth off then back on — last call should contain all three types
+		const birthCheckbox = screen.getByRole('checkbox', { name: /birth/i });
+		await fireEvent.click(birthCheckbox);
+		await fireEvent.click(birthCheckbox);
+
+		const lastCall = onFilterChange.mock.calls[onFilterChange.mock.calls.length - 1];
+		const activeTypes: string[] = lastCall[0];
+		expect(activeTypes).toContain('birth');
+		expect(activeTypes).toContain('death');
+		expect(activeTypes).toContain('marriage');
+	});
+
+	it('calls onFilterChange excluding multiple toggled-off types', async () => {
+		const EventFilters = await getComponent();
+		const onFilterChange = vi.fn();
+		render(EventFilters, {
+			props: { eventCounts: { birth: 10, death: 5, marriage: 3 }, onFilterChange }
+		});
+
+		await fireEvent.click(screen.getByRole('checkbox', { name: /birth/i }));
+		await fireEvent.click(screen.getByRole('checkbox', { name: /marriage/i }));
+
+		const lastCall = onFilterChange.mock.calls[onFilterChange.mock.calls.length - 1];
+		const activeTypes: string[] = lastCall[0];
+		expect(activeTypes).not.toContain('birth');
+		expect(activeTypes).not.toContain('marriage');
+		expect(activeTypes).toContain('death');
+	});
+});
+
+describe('buildFilterExpression', () => {
+	it('exports buildFilterExpression as a function', async () => {
+		const buildFilterExpression = await getBuildFilterExpression();
+		expect(typeof buildFilterExpression).toBe('function');
+	});
+
+	it('returns a Mapbox "in" filter expression for given active types', async () => {
+		const buildFilterExpression = await getBuildFilterExpression();
+		const expr = buildFilterExpression(['birth', 'death']);
+
+		// Mapbox GL filter: ["in", "type", "birth", "death"]
+		// or ["match", ["get", "type"], [...], true, false]
+		// Either way, the expression must be an array starting with a Mapbox operator
+		expect(Array.isArray(expr)).toBe(true);
+		expect(expr.length).toBeGreaterThanOrEqual(2);
+	});
+
+	it('produces a filter that includes the "type" property field', async () => {
+		const buildFilterExpression = await getBuildFilterExpression();
+		const expr = buildFilterExpression(['birth', 'death', 'marriage']);
+
+		// The expression should reference the "type" property
+		const flat = JSON.stringify(expr);
+		expect(flat).toContain('type');
+	});
+
+	it('includes all provided active types in the expression', async () => {
+		const buildFilterExpression = await getBuildFilterExpression();
+		const activeTypes = ['birth', 'death', 'marriage'];
+		const expr = buildFilterExpression(activeTypes);
+
+		const flat = JSON.stringify(expr);
+		for (const t of activeTypes) {
+			expect(flat).toContain(t);
+		}
+	});
+
+	it('returns a filter that excludes types not in the active list', async () => {
+		const buildFilterExpression = await getBuildFilterExpression();
+		const expr = buildFilterExpression(['birth']);
+
+		const flat = JSON.stringify(expr);
+		expect(flat).toContain('birth');
+		expect(flat).not.toContain('death');
+		expect(flat).not.toContain('marriage');
+	});
+
+	it('handles a single active type', async () => {
+		const buildFilterExpression = await getBuildFilterExpression();
+		const expr = buildFilterExpression(['census']);
+
+		expect(Array.isArray(expr)).toBe(true);
+		const flat = JSON.stringify(expr);
+		expect(flat).toContain('census');
+	});
+
+	it('handles all event types active', async () => {
+		const buildFilterExpression = await getBuildFilterExpression();
+		const allTypes = [
+			'birth', 'death', 'marriage', 'burial', 'immigration',
+			'emigration', 'military', 'christening', 'census', 'residence', 'other'
+		];
+		const expr = buildFilterExpression(allTypes);
+
+		expect(Array.isArray(expr)).toBe(true);
+		const flat = JSON.stringify(expr);
+		for (const t of allTypes) {
+			expect(flat).toContain(t);
+		}
+	});
+
+	it('handles empty active types array', async () => {
+		const buildFilterExpression = await getBuildFilterExpression();
+		const expr = buildFilterExpression([]);
+
+		// Should still return a valid Mapbox filter expression (that matches nothing)
+		expect(Array.isArray(expr)).toBe(true);
+	});
+});
+
+describe('Map page EventFilters integration', () => {
+	const mapPagePath = '../../src/routes/map/+page.svelte';
+
+	async function readMapPage() {
+		const { readFileSync } = await import('fs');
+		const { resolve } = await import('path');
+		return readFileSync(resolve(__dirname, mapPagePath), 'utf-8');
+	}
+
+	it('map page imports EventFilters component', async () => {
+		const content = await readMapPage();
+		expect(content).toContain('EventFilters');
+	});
+
+	it('map page imports or uses the filters store', async () => {
+		const content = await readMapPage();
+		expect(content).toMatch(/filters|getFilters/);
+	});
+
+	it('map page wires onFilterChange to setFilter or filter update', async () => {
+		const content = await readMapPage();
+		// Should have a handler that calls setFilter or builds a filter expression
+		expect(content).toMatch(/setFilter|buildFilterExpression|filterChange/i);
+	});
+
+	it('map page renders EventFilters with eventCounts prop', async () => {
+		const content = await readMapPage();
+		expect(content).toContain('eventCounts');
 	});
 });
