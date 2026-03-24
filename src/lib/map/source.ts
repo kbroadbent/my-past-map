@@ -78,3 +78,11 @@ export function buildFilterExpression(activeTypes: string[]): any[] {
 	}
 	return ['in', ['get', 'type'], ['literal', activeTypes]];
 }
+
+export function buildCombinedFilter(year: number, activeTypes: string[]): any[] {
+	const yearFilter = ['<=', ['get', 'year'], year];
+	const typeFilter = activeTypes.length === 0
+		? ['==', ['get', 'type'], '']
+		: ['in', ['get', 'type'], ['literal', activeTypes]];
+	return ['all', yearFilter, typeFilter];
+}
