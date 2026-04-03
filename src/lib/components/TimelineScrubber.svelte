@@ -13,17 +13,12 @@
 	let direction = $state<'forward' | 'backward'>('forward');
 
 	let minYear = $derived(
-		index.sortedEvents.length > 0
-			? index.sortedEvents[0].year
-			: 0
+		index.sortedEvents.length > 0 ? index.sortedEvents[0].year : 0
 	);
 	let maxYear = $derived(
-		index.sortedEvents.length > 0
-			? index.sortedEvents[index.sortedEvents.length - 1].year
-			: 0
+		index.sortedEvents.length > 0 ? index.sortedEvents[index.sortedEvents.length - 1].year : 0
 	);
 	let currentYear = $state<number | null>(null);
-
 	let displayYear = $derived(currentYear ?? maxYear);
 
 	let sortedGenKeys = $derived(
@@ -55,7 +50,6 @@
 				return;
 			}
 		}
-		// If no next, jump to max
 		currentYear = maxYear;
 		onYearChange(maxYear);
 	}
@@ -70,33 +64,144 @@
 				return;
 			}
 		}
-		// If no prev, jump to min
 		currentYear = minYear;
 		onYearChange(minYear);
 	}
 </script>
 
-<div class="timeline-scrubber">
-	<button aria-label={isPlaying ? 'Pause' : 'Play'} onclick={handlePlayPause}>
-		{isPlaying ? '⏸' : '▶'}
-	</button>
+<section class="timeline-scrubber" aria-label="Timeline controls">
+	<div class="controls-row">
+		<button
+			class="play-btn"
+			onclick={handlePlayPause}
+			aria-label={isPlaying ? 'Pause timeline' : 'Play timeline'}
+		>
+			{isPlaying ? '⏸' : '▶'}
+		</button>
 
-	<button aria-label={direction === 'forward' ? 'Direction: Forward' : 'Direction: Backward'} onclick={handleDirectionToggle}>
-		{direction === 'forward' ? '→' : '←'}
-	</button>
+		<button
+			class="direction-btn"
+			onclick={handleDirectionToggle}
+			aria-label="Playback direction: {direction}"
+		>
+			{direction === 'forward' ? '→' : '←'}
+		</button>
 
-	<button aria-label="Previous Gen" onclick={handlePrevGen}>⏮</button>
+		<div class="year-display" aria-live="polite">{displayYear}</div>
 
-	<input
-		type="range"
-		min={minYear}
-		max={maxYear}
-		value={displayYear}
-		aria-label="Timeline year"
-		oninput={handleSliderInput}
-	/>
+		<div class="scrubber-container">
+			<input
+				type="range"
+				min={minYear}
+				max={maxYear}
+				value={displayYear}
+				oninput={handleSliderInput}
+				aria-label="Timeline year"
+				aria-valuetext="Year {displayYear}"
+			/>
+		</div>
 
-	<button aria-label="Next Gen" onclick={handleNextGen}>⏭</button>
+		<div class="year-end">{maxYear}</div>
+	</div>
 
-	<span aria-live="polite">{displayYear}</span>
-</div>
+	<div class="gen-controls">
+		<button class="gen-btn" onclick={handlePrevGen} aria-label="Previous generation">
+			⏪ Gen
+		</button>
+		<button class="gen-btn" onclick={handleNextGen} aria-label="Next generation">
+			Gen ⏩
+		</button>
+	</div>
+</section>
+
+<style>
+	.timeline-scrubber {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: var(--color-map-panel);
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		padding: 12px 20px;
+		z-index: 5;
+	}
+
+	.controls-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.play-btn,
+	.direction-btn {
+		background: var(--color-gold);
+		border: none;
+		color: var(--color-map-bg);
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		cursor: pointer;
+		font-size: 14px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.play-btn:focus-visible,
+	.direction-btn:focus-visible {
+		outline: 2px solid var(--color-map-text-primary);
+		outline-offset: 2px;
+	}
+
+	.direction-btn {
+		width: 28px;
+		height: 28px;
+		font-size: 12px;
+	}
+
+	.year-display {
+		color: var(--color-map-text-primary);
+		font-size: 20px;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		min-width: 50px;
+	}
+
+	.scrubber-container {
+		flex: 1;
+	}
+
+	.scrubber-container input[type='range'] {
+		width: 100%;
+		accent-color: var(--color-gold);
+	}
+
+	.year-end {
+		color: var(--color-map-text-primary);
+		opacity: 0.5;
+		font-size: 12px;
+	}
+
+	.gen-controls {
+		display: flex;
+		gap: 8px;
+		justify-content: center;
+		margin-top: 8px;
+	}
+
+	.gen-btn {
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		color: var(--color-map-text-primary);
+		padding: 4px 12px;
+		border-radius: 4px;
+		font-size: 11px;
+		cursor: pointer;
+	}
+
+	.gen-btn:focus-visible {
+		outline: 2px solid var(--color-gold);
+		outline-offset: 2px;
+	}
+</style>

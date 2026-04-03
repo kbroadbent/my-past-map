@@ -33,3 +33,19 @@ body {
 	margin: 0;
 	font-family: var(--font-body);
 }
+
+/* Mapbox popup styling */
+.ancestor-popup .mapboxgl-popup-content {
+	background: rgba(30, 26, 20, 0.95);
+	color: #d4c4a0;
+	font-family: var(--font-body);
+	font-size: 13px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	line-height: 1.4;
+}
+
+.ancestor-popup .mapboxgl-popup-tip {
+	border-top-color: rgba(30, 26, 20, 0.95);
+}

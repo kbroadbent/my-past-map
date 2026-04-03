@@ -1,3 +1,6 @@
+.env
+.DS_Store
+.beads/
 .fabricator/
 .fabricator-worktrees/
 node_modules/
